@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.user.mapper.UserMapper">
+	
+	<resultMap type="User" id="UserMap">
+		<id column="id" property="id"/>
+		
+		<!-- 注意：如果要关联查询其它表，需要把当前类的属性手动设置一下 -->
+		<result column="docTitleId" property="docTitleId"/>
+		<result column="deptId" property="deptId"/>
+		<result column="registLeId" property="registLeId"/>
+		
+		<!-- 关联 医生职称 -->
+		<association property="userConstantItem" column="docTitleId" 
+			select="selectConstantItem"/>
+			
+		<!-- 关联 科室 -->
+		<association property="userDepartment" column="deptId" 
+			select="selectDepartment"/>
+			
+		<!-- 关联 挂号级别 -->
+		<association property="userRegistLevel" column="registLeId" 
+			select="selectRegistLevel"/>
+	</resultMap>
+	
+	<select id="selectConstantItem" resultType="UserConstantItem">
+		select * from constantitem where id=#{id}
+	</select>
+	<select id="selectDepartment" resultType="UserDepartment">
+		select * from department where id=#{id}
+	</select>
+	<select id="selectRegistLevel" resultType="UserRegistLevel">
+		select * from registlevel where id=#{id}
+	</select>
+
+	<select id="queryAll" resultMap="UserMap" >
+		select * from user
+		<include refid="queryAllWhere" />
+		order by id
+	</select>
+	
+	<!-- 创建sql片段，设置查询分页条件 -->
+	<sql id="queryAllWhere">
+		<where>
+			<if test="userName!=null and userName!=''">
+				and userName like concat('%', #{userName}, '%')
+			</if>
+			<if test="realName!=null and realName!=''">
+				and realName like concat('%', #{realName}, '%')
+			</if>
+			<if test="useType!=null and useType!='-1'">
+				and useType like concat('%', #{useType}, '%')
+			</if>
+			<if test="deptId!=null and deptId!='-1'">
+				and deptId like concat('%', #{deptId}, '%')
+			</if>
+			<!-- 只查询有效数据 -->
+			and delmark=1
+		</where>
+	</sql>
+	
+	<!-- 分页语句1：查询一共多少条记录 -->
+	<select id="queryAllPageCounts" resultType="int">
+		select count(*) from user
+			<include refid="queryAllWhere" />
+	</select>
+	<!-- 分页语句2：查询第n页的记录 -->
+	<select id="queryAllPage" resultMap="UserMap">
+		select * from user
+			<include refid="queryAllWhere" />
+			order by id
+			limit #{pager.startRow}, #{pager.rows}
+	</select>
+
+	
+	<!-- 查询一条记录 -->
+	<select id="queryById" resultType="User">
+		select * from user where id=#{id}
+	</select>
+	
+	<!-- 增加记录 -->
+	<insert id="add">
+		insert into user(userName, password, realName, useType,
+			docTitleId, isScheduling, deptId, registLeId, delMark)
+		values(#{userName}, #{password}, #{realName}, #{useType},
+			#{docTitleId}, #{isScheduling}, #{deptId}, #{registLeId}, #{delMark})
+	</insert>
+	
+	<!-- 修改记录 -->
+	<update id="update">
+		update user
+		set userName=#{userName}, password=#{password}, realName=#{realName},
+			useType=#{useType}, docTitleId=#{docTitleId}, isScheduling=#{isScheduling},
+		  	deptId=#{deptId}, registLeId=#{registLeId}, delMark=#{delMark}
+		where id=#{id}
+	</update>
+	
+	<!-- 删除记录-标记设为删除 -->
+	<update id="delete">
+		update user set delmark=0 where id=#{id}
+	</update>
+
+	<!-- 登录 -->
+	<select id="login" resultType="User">
+		select * from user where userName=#{userName} and password=#{password}
+	</select>
+	
+	<!-- 查询科室表获取数据，用于生成下拉列表框 -->
+	<select id="queryUserDepartment" resultType="UserDepartment">
+		select * from department
+	</select>
+
+	
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.registlevel.mapper.RegistLevelMapper">
+
+	<select id="queryAll" resultType="RegistLevel" >
+		select * from registlevel
+		<where>
+			<if test="registCode!=null and registCode!=''">
+				and registCode like concat('%', #{registCode}, '%')
+			</if>
+			<if test="registName!=null and registName!=''">
+				and registName like concat('%', #{registName}, '%')
+			</if>
+			<!-- 只查询有效数据 -->
+			and delmark=1
+		</where>
+		order by id
+	</select>
+	
+	<!-- 查询一条记录 -->
+	<select id="queryById" resultType="RegistLevel">
+		select * from registlevel where id=#{id}
+	</select>
+	
+	<!-- 增加记录 -->
+	<insert id="add">
+		insert into registlevel(registCode, registName, sequenceNo, registFee,registQuota, delMark)
+		values(#{registCode}, #{registName}, #{sequenceNo}, #{registFee},#{registQuota}, #{delMark})
+	</insert>
+	
+	<!-- 修改记录 -->
+	<update id="update">
+		update registlevel
+		set registCode=#{registCode}, registName=#{registName}, sequenceNo=#{sequenceNo},
+			registFee=#{registFee}, registQuota=#{registQuota}, delMark=#{delMark}
+		where id=#{id}
+	</update>
+	
+	<!-- 删除记录 -->
+	<update id="delete">
+		update registlevel set delmark=0 where id=#{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.checkapply.mapper.ApplyMapper">
+	
+	<resultMap type="CheckApply" id="ApplyMap">
+		<id column="id" property="id"/>
+		<!-- 注意：如果要关联查询其它表，需要把当前类的属性手动设置一下 -->
+		<result column="doctorId" property="doctorId"/>
+		<result column="checkOperId" property="checkOperId"/>
+		<result column="resultOperId" property="resultOperId"/>
+		<result column="registId" property="registId"/>
+		
+		<!-- 关联 开立医生ID对应姓名 -->
+		<association property="applyUser1" column="doctorId" select="selectDoctorName"/>
+		<!-- 关联 检察人员ID对应姓名 -->
+		<association property="applyUser2" column="checkOperId" select="selectCheckOperName"/>
+		<!-- 关联 录入人员ID对应姓名 -->
+		<association property="applyUser3" column="resultOperId" select="selectResultOperName"/>
+		<!-- 关联 挂号ID对应患者姓名 -->
+		<association property="applyRegister" column="registId" select="selectRegister"/>
+	</resultMap>
+	
+	<select id="selectDoctorName" resultType="ApplyUser">
+		select * from user where id=#{id}
+	</select>
+	<select id="selectCheckOperName" resultType="ApplyUser">
+		select * from user where id=#{id}
+	</select>
+	<select id="selectResultOperName" resultType="ApplyUser">
+		select * from user where id=#{id}
+	</select>
+	<select id="selectRegister" resultType="applyRegister">
+		select * from register where id=#{id}
+	</select>
+
+	<select id="queryAll" resultMap="ApplyMap" >
+		select * from checkapply
+		<include refid="queryAllWhere" />
+		order by id
+	</select>
+	
+	<!-- 创建sql片段，设置查询分页条件 -->
+	<sql id="queryAllWhere">
+		<where>
+			<if test="medicalId!=null and medicalId!=''">
+				and medicalId=#{medicalId}
+			</if>
+			<if test="registId!=null and registId!=''">
+				and registId=#{registId}
+			</if>
+			<if test="itemId!=null and itemId!=''">
+				and itemId=#{itemId}
+			</if>
+			<if test="isUrgent!=null and isUrgent!='-1'">
+				and isUrgent=#{isUrgent}
+			</if>
+			and state != 0 and recordType=3
+		</where>
+	</sql>
+	
+	<!-- 分页语句1：查询一共多少条记录 -->
+	<select id="queryAllPageCounts" resultType="int">
+		select count(*) from checkapply
+			<include refid="queryAllWhere" />
+	</select>
+	<!-- 分页语句2：查询第n页的记录 -->
+	<select id="queryAllPage" resultMap="ApplyMap">
+		select * from checkapply
+			<include refid="queryAllWhere" />
+			order by id
+			limit #{pager.startRow}, #{pager.rows}
+	</select>
+
+	<!-- 增加记录 -->
+	<insert id="add">
+		insert into checkapply
+			(medicalId, registId, itemId, name,objective, 
+			position, treatment, isUrgent, num,creationTime,
+			doctorId,checkOperId,resultOperId,checkTime,result,
+			resultTime,state,recordType)
+		values
+			(#{medicalId}, #{registId}, #{itemId}, #{name},#{objective}, 
+			#{position}, #{treatment}, #{isUrgent}, #{num}, #{creationTime}, 
+			#{doctorId}, #{checkOperId},#{resultOperId}, #{checkTime},#{result},
+			#{resultTime},#{state},#{recordType})
+	</insert>
+	
+	<!-- 查询一条记录 -->
+	<select id="queryById" resultType="CheckApply">
+		select * from checkapply where id=#{id}
+	</select>
+	
+	<!-- 修改记录 -->
+	<update id="update">
+		update checkapply
+		set medicalId=#{medicalId}, registId=#{registId}, itemId=#{itemId}, name=#{name},
+			objective=#{objective}, position=#{position}, treatment=#{treatment},
+			isUrgent=#{isUrgent}, num=#{num}, creationTime=#{creationTime}, 
+			doctorId=#{doctorId}, checkOperId=#{checkOperId},resultOperId=#{resultOperId}, 
+			checkTime=#{checkTime},result=#{result},resultTime=#{resultTime},
+			state=#{state},recordType=#{recordType} 
+		where id=#{id}
+	</update>
+	
+	<!-- 删除记录 -->
+	<delete id="delete">
+		delete from checkapply where id=#{id}
+	</delete>
+	
+	<!-- 作废记录-修改标记为0 -->
+	<update id="zuoFei">
+		update checkapply set state=0 where id=#{id}
+	</update>
+	
+	<!-- 引用组套-查询组套 -->
+	<resultMap type="CheckTemplate" id="TemplateMap">
+		<id column="id" property="id"/>
+		<!-- 注意：如果要关联查询其它表，需要把当前类的属性手动设置一下 -->
+		<result column="doctorId" property="doctorId"/>
+		
+		<!-- 关联 医生ID对应姓名 -->
+		<association property="applyUser" column="doctorId" select="selectTempDoctorName"/>
+	</resultMap>
+	
+	<select id="selectTempDoctorName" resultType="ApplyUser">
+		select * from user where id=#{id}
+	</select>
+
+	<select id="queryAllTemp" resultMap="TemplateMap" >
+		select * from checktemplate order by id
+	</select>
+	
+	
+	
+	
+	
+</mapper>

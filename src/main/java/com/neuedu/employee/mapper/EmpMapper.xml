@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.neuedu.employee.mapper.EmpMapper">
+
+	<select id="queryAll" resultType="Emp" >
+		select * from employee
+		<where>
+			<if test="id!=null and id!=''">
+				and id like concat('%', #{id}, '%')
+			</if>
+		</where>
+		order by id
+	</select>
+	
+	<!-- 查询一条记录 -->
+	<select id="queryById" resultType="Emp">
+		select * from employee where id=#{id}
+	</select>
+	
+	<!-- 增加记录 -->
+	<insert id="add">
+		insert into employee(id, name, sex, edu, post, dept, type, station)
+		values(#{id}, #{name}, #{sex}, #{edu}, #{post}, #{dept}, #{type}, #{station})
+	</insert>
+	
+	<!-- 修改记录 -->
+	<update id="update">
+		update employee
+		set id=#{id}, name=#{name}, sex=#{sex},edu=#{edu}, post=#{post}, dept=#{dept},type=#{type},station=#{station}
+		where id=#{id}
+	</update>
+	
+	<!-- 删除记录 -->
+	<delete id="delete">
+		delete from employee where id=#{id}
+	</delete>
+	
+</mapper>
