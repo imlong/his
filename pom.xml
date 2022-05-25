@@ -11,7 +11,7 @@
   <!-- 设置当前配置文件中要使用的变量名；使用方式 ${标签名称} -->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.0.6.RELEASE</spring.version>
+		<spring.version>5.2.22.RELEASE</spring.version>
 	</properties>
 
 	<!-- 引入各种依赖 -->
